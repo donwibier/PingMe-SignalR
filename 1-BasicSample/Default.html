@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+</head>
+<body>
+    <div>
+        <span>Number of hits:</span><span id="counter">0</span> <br />
+        
+    </div>
+    <img src="Content/don.png" id="theObject" />
+    <script src="Scripts/jquery-1.6.4.js"></script>
+    <script src="Scripts/jquery-ui-1.11.4.js"></script>
+    <script src="Scripts/jquery.signalR-2.2.0.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            // the connection object
+            var con = $.hubConnection();
+            var myHub = con.createHubProxy("myHub");
+
+            // counter code
+            var count = $("#counter");            
+            myHub.on("connectionCounted", function (connectionCount) {
+                count.text(connectionCount);
+            });
+
+            // the object
+            var obj = $("#theObject");
+            // the hub's event handler
+            myHub.on("objectMoved", function (x, y) {
+                obj.css("left", x);
+                obj.css("top", y);
+                obj.text(x + ',' + y);
+            });
+
+            // set up jQuery draggable
+            obj.draggable({
+                drag: function () {
+                    var self = $(this),
+                        x = this.offsetLeft,
+                        y = this.offsetTop;
+                    myHub.invoke("MoveObject", x, y);
+                }
+            });
+
+            // start the connection
+            con.start().done(function () {
+            });
+        });
+    </script>
+
+</body>
+</html>
